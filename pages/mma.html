@@ -216,7 +216,7 @@ On a :
 
 Quand on va sur http://bow.chal.mmactf.link/~scs/crypt5.cgi, on fait des tests
 
-Apr&egrave;s plusieurs test, on se rend compte que l'octet obtenu d&eacute;pend de l'octet précédent. En creusant on s'aperçoit que la relation entre deux caractères consécutifs est simplement un xor.
+Apr&egrave;s plusieurs test, on se rend compte que l'octet obtenu d&eacute;pend de l'octet pr&eacute;c&eacute;dent. En creusant on s'aper&ccedil;oit que la relation entre deux caract&egrave;res cons&eacute;cutifs est simplement un xor.
 
 On se doute que le flag commence par MMA
 
@@ -346,8 +346,78 @@ http://recocta.chal.mmactf.link:9080/u/truc.php?c=cat%20/flag
 
 > Le flag est "MMA{you can run php from script tag}"
 
+*********************
+## [Splitted](http://score.mmactf.link/problems/5?locale=en) *30*
+by swissky
+*********************
+
+Fichier du challenge : http://assets.score.mmactf.link/attachments/splitted.7z-68ad844f2aab26d3d358ae9fa6c598a2727b0c0056567a288ffcd9414229121c
+
+On r&eacute;cup&egrave;re donc une archive 7z que l'on s'empresse d'extraire avec unzip/winrar/etc
+Son contenu est bien maigre, c'est un simple fichier .pcap
+Aucun soucis de ce c&ocirc;t&eacute; l&agrave; on l'ouvre avec Wireshark et on examine les nombreuses trames qu'il contient :
+
+```
+3       0.003201        192.168.3.102   192.168.4.10    TCP     66      55155->80 [ACK] Seq=1 Ack=1 Win=29312 Len=0
+4       0.003350        192.168.3.102   192.168.4.10    HTTP    151     HEAD /flag.zip HTTP/1.1
+5       0.006235        192.168.4.10    192.168.3.102   TCP     66      80->55155 [ACK] Seq=1 Ack=86 Win=29056 Len=0
+14      0.017832        192.168.3.102   192.168.4.10    HTTP    174     GET /flag.zip HTTP/1.1
+...
+88      0.143051        192.168.3.102   192.168.4.10    TCP     66      55163->80 [FIN, ACK] Seq=109 Ack=755 Win=30720 Len=0
+```
+
+Etrange, on dirait que certaines trames font r&eacute;f&eacute;rences &agrave; un fichier "flag.zip", on les isolent avec le filtre "HTTP". Apparemment une requête GET est faite et une partie du fichier "flag.zip" est envoy&eacute;e
+
+```
+14      0.017832        192.168.3.102   192.168.4.10    HTTP    174     GET /flag.zip HTTP/1.1
+16      0.024913        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+...
+84      0.139735        192.168.3.102   192.168.4.10    HTTP    174     GET /flag.zip HTTP/1.1
+86      0.142737        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+```
+
+Pour mieux se r&eacute;p&eacute;rer dans les trames et afin de ne garder que les bouts fichiers on affine notre filtre
+Un clic sur la colonne "Destination" nous permettra de les regrouper :
+```
+16      0.024913        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+26      0.041516        192.168.4.10    192.168.3.102   HTTP    816     HTTP/1.1 206 Partial Content  (application/zip)
+36      0.054710        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+46      0.067354        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+56      0.084020        192.168.4.10    192.168.3.102   HTTP    813     HTTP/1.1 206 Partial Content  (application/zip)
+66      0.097152        192.168.4.10    192.168.3.102   HTTP    818     HTTP/1.1 206 Partial Content  (application/zip)
+76      0.129343        192.168.4.10    192.168.3.102   HTTP    819     HTTP/1.1 206 Partial Content  (application/zip)
+86      0.142737        192.168.4.10    192.168.3.102   HTTP    820     HTTP/1.1 206 Partial Content  (application/zip)
+4       0.003350        192.168.3.102   192.168.4.10    HTTP    151     HEAD /flag.zip HTTP/1.1
+```
+
+On r&eacute;cup&egrave;re toutes les parties et le "header", malheureusement les fichiers ne sont pas dans l'ordre..
+Il nous faut inspecter la trame de chacun d'entre eux pour extraire le contenu :
+Content-Range: bytes 938-1406/3745
+Dans cet exemple, on reconna&icirc;t facilement que le fichier contient les bytes 938 &agrave; 1406 d'un fichier en contenant 3745.
+On exporte toutes les donn&eacute;es de chaque trame avec "Export selected bytes" et on le nomme avec son Content Range :
+
+```bash
+ls -ail
+c0-468_3745      c1876-2344_3745  c2814-3282_3745  c469-937_3745
+c1407-1875_3745  c2345-2813_3745  c3283-3744_3745  c938-1406_3745
+```
+
+Une derni&egrave;re &eacute;tape pour r&eacute;unir tous ces paquets de donn&eacute;es :
+```bash
+cat c0-468_3745 c469-937_3745  c938-1406_3745  c1407-1875_3745 c1876-2344_3745 c2345-2813_3745 c2814-3282_3745 c3283-3744_3745 > flag.zip
+```
+
+Et maintenant on extrait le contenu de "flag.zip" qui est un fichier .psd, le format de fichier Photoshop.
+C'est parti on lance Photoshop ou The Gimp et on inspecte les calques.
+Il y en a 2, le premier est un calque rempli de pixels blanc, le second para&icirc;t transparent.
+On supprime le premier qui est inutile et on d&eacute;couvre le flag &eacute;crit en noir sur fond transparent.
+
+
+> Flag : MMA{sneak_spy_sisters}
+
+
 ******************
-Splitted and RPS coming soon
+RPS coming soon
 ******************
 
 **********************
