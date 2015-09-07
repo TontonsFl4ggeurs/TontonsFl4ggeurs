@@ -31,9 +31,7 @@ Parmis tous les sites possibles, en voici un:
 
 http://stackoverflow.com/questions/12127833/patterns-possible-on-3x3-matrix-of-numbers
 
-```
-  Flag1: 389112
-```
+> Flag1: 389112
 
 ****************
 ## [Nagoya Castle](http://score.mmactf.link/problems/14?locale=en) *100*
@@ -139,23 +137,23 @@ AAA donne 2a 2a 2a
 
 BBB donne 2b 2b 2b
 
-On va tester un "C&eacute;sar"
+On va tester un "C&eacute;sar" en console python:
 
-% python
-Python 2.7.3 (default, Mar 14 2014, 11:57:14)
-[GCC 4.7.2] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
->>> ord(’A’) - 0x2a
+```python
+ord('A') - 0x2a
 23
->>> flag = ’’
->>> for i in ’36 36 2a 64 4b 4b 4a 21 1e 4b 1f 20 1f 21 4d 4b 1b 1d 19 4f 21 4c 1d 4a 4e 1c 4c 1b 22 4f 22 22 1b 21 4c 20 1d 4f 1f 4c 4a 19 22 1a 66’.split(’ ’) :
-... flag += chr(23 + int(i, 16))
-...
->>> flag
-’MMAbba85b6768db240f8c4ae3c29f9928c74f6ca091’
+flag = ''
+for i in '36 36 2a 64 4b 4b 4a 21 1e 4b 1f 20 1f 21 4d 4b 1b 1d 19 4f 21 4c 1d 4a 4e 1c 4c 1b 22 4f 22 22 1b 21 4c 20 1d 4f 1f 4c 4a 19 22 1a 66'.split(' ') :
+    flag += chr(23 + int(i, 16))
+flag
+'MMAbba85b6768db240f8c4ae3c29f9928c74f6ca091'
+```
+
+> Le flag est donc MMAbba85b6768db240f8c4ae3c29f9928c74f6ca091
 
 *********************************************************************************
-** Epreuve : Smart Cipher System (http://bow.chal.mmactf.link/~scs/crypt4.cgi) **
+## [Smart Cipher System 2](http://bow.chal.mmactf.link/~scs/crypt4.cgi) *10*
+by sourceperrier
 *********************************************************************************
 
 On a :
@@ -164,45 +162,53 @@ e3 e3 83 21 33 96 23 43 ef 9a 9a 05 18 c7 23 07 07 07 c7 9a 04 33 23 07 23 ef 12
 Quand on va sur http://bow.chal.mmactf.link/~scs/crypt4.cgi, on fait des tests
 
 AAA donne 83 83 83
+
 BBB donne 2c 2c 2c
 
 C&eacute;sar ?
 
->>> 0x83 - ord(’A’)
+```python
+0x83 - ord('A')
 66
->>> 0x2c - ord(’B’) 22
+0x2c - ord('B')
+22
+```
 
-Non, ce n’est pas un c&eacute;sar.
+Ce n'est pas un c&eacute;sar.
 
 xor ?
-
->>> 0x83 ^ ord(’A’)
+```
+0x83 ^ ord('A')
 194
->>> 0x2c ^ ord(’B’)
+0x2c ^ ord('B')
 110
+```
 
-Non ce n’est pas un xor.
+Ce n'est pas un xor non plus.
 
 AAAAAAAAAA donne 83 83 83 83 83 83 83 83 83 83
 
-Donc, c’est un caract&egrave;re chiffr&eacute; par un octet...
+Donc, c'est un caract&egrave;re chiffr&eacute; par un octet...
 
 On va se cr&eacute;er une table :
 
 ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_+=-*
 donne 83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84 53 d1 00 ed 20 fc b1 5b 6a cb be 04 c7 23 c3 18 96 05 9a 07 12 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8 51 a3 40 8f 92 9d 38 f5 bc b6 da 21 ff d8 cf f1 27 d8 e5
 
->>> alpha = ’ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_+=-*’
->>> chiffre = ’83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84 53 d1 00 ed 20 fc b1 5b 6a cb be 04 c7 23 c3 18 96 05 9a 07 12 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8 51 a3 40 8f 92 9d 38 f5 bc b6 da 21 ff d8 cf f1 27 d8 e5’.split(’ ’)
->>> flag = ’’
->>> for i in ’e3 e3 83 21 33 96 23 43 ef 9a 9a 05 18 c7 23 07 07 07 c7 9a 04 33 23 07 23 ef 12 c7 04 96 43 23 23 18 04 04 05 c7 fb 18 96 43 ef 43 ff’.split(’ ’) :
-... flag += alpha[chiffre.index(i)]
-...
->>> flag
-’MMAf52da776412888170f282a9105d2240061c45dad
+```
+alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_+=-*'
+chiffre = '83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84 53 d1 00 ed 20 fc b1 5b 6a cb be 04 c7 23 c3 18 96 05 9a 07 12 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8 51 a3 40 8f 92 9d 38 f5 bc b6 da 21 ff d8 cf f1 27 d8 e5'.split(' ')
+flag = ''
+for i in 'e3 e3 83 21 33 96 23 43 ef 9a 9a 05 18 c7 23 07 07 07 c7 9a 04 33 23 07 23 ef 12 c7 04 96 43 23 23 18 04 04 05 c7 fb 18 96 43 ef 43 ff'.split(' ') :
+    flag += alpha[chiffre.index(i)]
+
+flag
+'MMAf52da776412888170f282a9105d2240061c45dad'
+```
+> Le flag est donc MMAf52da776412888170f282a9105d2240061c45dad
 
 *********************************************************************************
-** Epreuve : Smart Cipher System (http://bow.chal.mmactf.link/~scs/crypt5.cgi) **
+## [Smart Cipher System 3](http://bow.chal.mmactf.link/~scs/crypt5.cgi) *30*
 *********************************************************************************
 
 On a :
@@ -210,24 +216,29 @@ On a :
 
 Quand on va sur http://bow.chal.mmactf.link/~scs/crypt5.cgi, on fait des tests
 
-Apr&egrave;s plusieurs test, on se rend compte que l’octet obtenu d&eacute;pend du premier
+Apr&egrave;s plusieurs test, on se rend compte que l'octet obtenu d&eacute;pend du premier
 
 On se doute que le flag commence par MMA
 
 Donc le second caract&egrave;re vaut 00 car M ^ M vaut 0
 
-script :
+```python
+flag, p = 'M','M'
+for i in '60 00 0c 3a 1e 52 02 53 02 51 0c 5d 56 51 5a 5f 5f 5a 51 00 05 53 56 0a 5e 00 52 05 03 51 50 55 03 04 52 04 0f 0f 54 52 57 03 52 04 4e'.split(' ')[1 :] :
+p = chr(ord(p) ^ int(i, 16))
+    flag += p
 
->>> flag, p = ’M’,’M’
->>> for i in ’60 00 0c 3a 1e 52 02 53 02 51 0c 5d 56 51 5a 5f 5f 5a 51 00 05 53 56 0a 5e 00 52 05 03 51 50 55 03 04 52 04 0f 0f 54 52 57 03 52 04 4e’.split(’ ’)[1 :] :
-... p = chr(ord(p) ^ int(i, 16))
-... flag += p
-...
->>> flag
-’MMAe75fd59d2c9f9c227d28ff412c3fea3787c1fe73’
+flag
+'MMAe75fd59d2c9f9c227d28ff412c3fea3787c1fe73'
+```
 
-#Write Up MQAAA
+> Le flag est donc MMAe75fd59d2c9f9c227d28ff412c3fea3787c1fe73
+
+
+**************************
+## [MQAAAA](http://score.mmactf.link/problems/27?locale=en) *70*
 by myrti
+**************************
 
 I got lucky with this challenge. I first looked at the original string and it's easily seen that this is base64, so I decrypted that and got:
 ```syntaxe
@@ -241,8 +252,10 @@ WScript.echo("MMA{the_flag_word_is_obfuscation}")
 ```
 which is the flag! :)
 
-
-#Write up   How to use
+**************************
+## [How to use](http://score.mmactf.link/problems/6?locale=en) *30*
+by myrti
+**************************
 
 After downloading the file, the first thing I did was to run it through the strings command. Two things stood out:
 ``` syntaxe
@@ -289,34 +302,94 @@ mov     eax, offset loc_100010A0
 
 ```
 
-
-
 So from the looks of it, there's individual characters defined which are then filled by copying something from the .text section. Looking at the .text section we see:
-```syntaxe
-.text:10001010  B8 61 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©a...+¦¦¦¦¦¦¦¦¦¦
-.text:10001020  B8 62 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©b...+¦¦¦¦¦¦¦¦¦¦
-.text:10001030  B8 63 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©c...+¦¦¦¦¦¦¦¦¦¦
-.text:10001040  B8 64 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©d...+¦¦¦¦¦¦¦¦¦¦
-.text:10001050  B8 65 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©e...+¦¦¦¦¦¦¦¦¦¦
-.text:10001060  B8 66 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©f...+¦¦¦¦¦¦¦¦¦¦
-.text:10001070  B8 41 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©A...+¦¦¦¦¦¦¦¦¦¦
-.text:10001080  B8 4D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©M...+¦¦¦¦¦¦¦¦¦¦
-.text:10001090  B8 30 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©0...+¦¦¦¦¦¦¦¦¦¦
-.text:100010A0  B8 31 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©1...+¦¦¦¦¦¦¦¦¦¦
-.text:100010B0  B8 32 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©2...+¦¦¦¦¦¦¦¦¦¦
-.text:100010C0  B8 33 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©3...+¦¦¦¦¦¦¦¦¦¦
-.text:100010D0  B8 34 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©4...+¦¦¦¦¦¦¦¦¦¦
-.text:100010E0  B8 37 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©7...+¦¦¦¦¦¦¦¦¦¦
-.text:100010F0  B8 38 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©8...+¦¦¦¦¦¦¦¦¦¦
-.text:10001100  B8 39 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©9...+¦¦¦¦¦¦¦¦¦¦
-.text:10001110  B8 7B 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©{...+¦¦¦¦¦¦¦¦¦¦
-.text:10001120  B8 7D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©}...+¦¦¦¦¦¦¦¦¦¦
+```
+.text:10001010  B8 61 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @a...+..........
+.text:10001020  B8 62 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @b...+..........
+.text:10001030  B8 63 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @c...+..........
+.text:10001040  B8 64 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @d...+..........
+.text:10001050  B8 65 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @e...+..........
+.text:10001060  B8 66 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @f...+..........
+.text:10001070  B8 41 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @A...+..........
+.text:10001080  B8 4D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @M...+..........
+.text:10001090  B8 30 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @0...+..........
+.text:100010A0  B8 31 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @1...+..........
+.text:100010B0  B8 32 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @2...+..........
+.text:100010C0  B8 33 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @3...+..........
+.text:100010D0  B8 34 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @4...+..........
+.text:100010E0  B8 37 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @7...+..........
+.text:100010F0  B8 38 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @8...+..........
+.text:10001100  B8 39 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @9...+..........
+.text:10001110  B8 7B 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @{...+..........
+.text:10001120  B8 7D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  @}...+..........
 ```
 This looks promising.
 
 From there on it's simply a matter of filling in the letters stored in .text into the variables defined in the module and then sorting them in ascending order. This leads to the flag:
 
-MMA{fc7d90ca001fc8712497d88d9ee7efa9e9b32ed8}
+> MMA{fc7d90ca001fc8712497d88d9ee7efa9e9b32ed8}
+
+
+******************
+Upload, Splitted and RPS coming soon
+******************
+
+**********************
+Unfinished:
+**********************
+
+*****************
+### This program can not be run into DOS mode:
+by TiWim
+*****************
+
+I could only disassemlbe this program with radare2, but I didn't really know how to use it.
+With these two commands found in this [tutorial](http://thanat0s.trollprod.org/2014/05/radare2-tuto-basic-apprendre-lassembleur/), I could see some interesting stuff:
+
+```bash
+[0000:0040]> aa
+[0000:0040]> pdf
+/ (fcn) fcn.00000406 82
+|           0000:0406    a4           movsb
+|           0000:0407    204000       and [bx+si], al
+|           0000:040a    50           push ax
+|           ; DATA XREF from 0x000020f4 (unk)
+|           0000:040b    68f420       push 0x20f4 ; 0x000020f4
+|           0000:040e    40           inc ax
+|           0000:040f    00c6         add dh, al
+|           0000:0411    0037         add [bx], dh
+|           0000:0413    c6400161     mov byte [bx+si+0x1], 0x61   # a
+|           0000:0417    c6400233     mov byte [bx+si+0x2], 0x33   # 3
+|           0000:041b    c6400335     mov byte [bx+si+0x3], 0x35   # 5
+|           0000:041f    c6400468     mov byte [bx+si+0x4], 0x68   # h
+|           0000:0423    c6400578     mov byte [bx+si+0x5], 0x78   # x
+|           0000:0427    c6400662     mov byte [bx+si+0x6], 0x62   # b
+|           0000:042b    c6400739     mov byte [bx+si+0x7], 0x39   # 9
+|           0000:042f    c6400871     mov byte [bx+si+0x8], 0x71   # q
+|           0000:0433    c6400938     mov byte [bx+si+0x9], 0x38   # 8
+|           0000:0437    c6400a31     mov byte [bx+si+0xa], 0x31   # 1
+|           0000:043b    c6400b66     mov byte [bx+si+0xb], 0x66   # f
+|           0000:043f    c6400c73     mov byte [bx+si+0xc], 0x73   # s
+|           0000:0443    c6400d67     mov byte [bx+si+0xd], 0x67   # g
+|           0000:0447    c6400e36     mov byte [bx+si+0xe], 0x36   # 6
+|           ; CODE (CALL) XREF from 0x0000044d (fcn.0000044d)
+|           ; CODE (CALL) XREF from 0x00000458 (fcn.00000458)
+|           0000:044b    ff15         call word [di] ; (fcn.0000044d)
+|              fcn.0000044d(unk, unk)
+```
+
+So, I found a35hxb9q81fsg6
+but I was missing the first character '7' and I forgot that with the command __strings cannotberun__, I saw the string: __The FLAG is MMA{%s}__
+
+Real flag was MMA{7a35hxb9q81fsg6}
+
+
+Mortal Magi agent, stream and
+
+### QRcode:
+
+![](qrcodeV0.png)  ![](qrcodeV1.png)
+
 
 
     </xmp>
