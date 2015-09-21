@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <title>Tontons Fl4ggeurs</title>
+    <meta id='page-params'
+    theme='journal'
+    title='Tontons Fl4ggeurs'
+    menu='Home,index.html,WriteUp du MMA,MMA/index.html,WriteUp du CSAW,CSAW/index.html'
+    active='2'
+    root='/'>
+    <xmp>
+<br/>
+<br/>
+
+********************
+## [Forensic Transfert](https://ctf.isis.poly.edu/challenges#Transfer) *100*
+by TiWim
+********************
+
+In this challenge, we had to analyse the following [capture:](https://ctf.isis.poly.edu/static/uploads/9816b472715fa536ab95bf43edc10540/net_756d631588cb0a400cc16d1848a5f0fb.pcap)
+
+With Wireshark, we simply had to follow the TCP stream and dump the informations:
+It was a simple python code followed by some text:
+
+```python
+import string
+import random
+from base64 import b64encode, b64decode
+
+FLAG = 'flag{xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}'
+
+enc_ciphers = ['rot13', 'b64e', 'caesar']
+#dec_ciphers = ['rot13', 'b64d', 'caesard']
+
+def rot13(s):
+    _rot13 = string.maketrans(
+        "ABCDEFGHIJKLMabcdefghijklmNOPQRSTUVWXYZnopqrstuvwxyz",
+        "NOPQRSTUVWXYZnopqrstuvwxyzABCDEFGHIJKLMabcdefghijklm")
+    return string.translate(s, _rot13)
+
+def b64e(s):
+    return b64encode(s)
+
+def caesar(plaintext, shift=3):
+    alphabet = string.ascii_lowercase
+    shifted_alphabet = alphabet[shift:] + alphabet[:shift]
+    table = string.maketrans(alphabet, shifted_alphabet)
+    return plaintext.translate(table)
+
+def encode(pt, cnt=50):
+    tmp = '2{}'.format(b64encode(pt))
+    for cnt in xrange(cnt):
+        c = random.choice(enc_ciphers)
+        i = enc_ciphers.index(c) + 1
+        _tmp = globals()[c](tmp)
+        tmp = '{}{}'.format(i, _tmp)
+        print c
+    return tmp
+
+if __name__ == '__main__':
+    encode(FLAG, cnt=?)2Mk16Sk5iakYxV[..]UmVsQlJQVDA9
+```
+
+By analysing the code, we can see that the random operation is stored at the beginning of the output string.
+
+So, with a simple routine, we can reverse the flag:
+
+```python
+import string
+from base64 import b64decode as b64encode
+
+with open("transfertString", "r") as fichier:
+    FLAG = fichier.read()
+
+enc_ciphers = ['rot13', 'b64e', 'caesar']
+
+def rot13(s):
+        _rot13 = string.maketrans(
+        "ABCDEFGHIJKLMabcdefghijklmNOPQRSTUVWXYZnopqrstuvwxyz",
+        "NOPQRSTUVWXYZnopqrstuvwxyzABCDEFGHIJKLMabcdefghijklm")
+        return string.translate(s, _rot13)
+
+def b64e(s):
+        return b64encode(s)
+
+def caesar(plaintext, shift=3):
+    alphabet = string.ascii_lowercase
+    shifted_alphabet = alphabet[shift:] + alphabet[:shift]
+    table = string.maketrans(alphabet, shifted_alphabet)
+    return plaintext.translate(table)
+
+
+if __name__ == '__main__':
+    operation, FLAG = FLAG[:1], FLAG[1:]
+    while True:
+        if operation == '1':
+            FLAG = rot13(FLAG)
+        elif operation == '2':
+            FLAG = b64e(FLAG)
+        elif operation == '3':
+            FLAG = caesar(FLAG, 23)
+        else:
+            print 'The flag is: ' + ''.join(operation + FLAG)
+            break
+        operation, FLAG = FLAG[:1], FLAG[1:]
+```
+
+When executing this script:
+
+> The flag is: "flag{li0ns_and_tig3rs_4nd_b34rs_0h_mi}"
+
+
+    </xmp>
+    <script src="http://smzg.github.io/strapdown/example/config/strapdown.js"></script>
+</html>
+
