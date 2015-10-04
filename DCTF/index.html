@@ -22,7 +22,7 @@ First of all, the home page is explaining us the concept: it's an online tool wh
 <? $shell = shell_exec("getent passwd dctf | cut -d: -f7"); ?>
 ```
 
-Then we can suppose the server is running PHP under Linux, and we know what data should we be able to get. I uploaded some files containing special chars, in the zip file name or in the zipped files, but I had no significant results. The output of the commande unzip archive.zip (the name of the uploaded file is renamed to archive.zip) may have been an attack vector, but I couldn't exploit it in any ways.
+Then we can suppose the server is running PHP under Linux, and we know what data should we be able to get. I uploaded some files containing special chars, in the zip file name or in the zipped files, but I had no significant results. The output of the command unzip archive.zip (the name of the uploaded file is renamed to archive.zip) may have been an attack vector, but I couldn't exploit it in any ways.
 I've been looking on the web if I could zip symlinks, therefore I tried to access the content of `/etc/passwd` by zipping a symlink pointing to it.
 
 ```bash
