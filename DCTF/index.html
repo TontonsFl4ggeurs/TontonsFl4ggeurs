@@ -29,7 +29,7 @@ I've been looking on the web if I could zip symlinks, therefore I tried to acces
 vic511@vic511:~/challenges/ctfs/dctf2k15/web$ ln -s /etc/passwd passwd
 ```
 
-Then zip it with the --symlinks option (etiher way it would just zip the content of your /etc/passwd).
+Then zip it with the --symlinks option (otherwise it would just zip the content of your /etc/passwd).
 
 ```bash
 vic511@vic511:~/challenges/ctfs/dctf2k15/web$ zip --symlinks -r h.zip passwd
