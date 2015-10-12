@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <title>Tontons Fl4ggeurs</title>
+    <meta id='page-params'
+    theme='journal'
+    title='Tontons Fl4ggeurs'
+    menu='Home,,WriteUp du MMA,MMA/,WriteUp du CSAW,CSAW/,WriteUp du DCTF,DCTF/,WriteUp du ASIS,ASIS/'
+    active='5'
+    root='/'>
+    <xmp>
+<br/>
+<br/>
+
+********************
+## [Biglie](#) *100*
+by vic511
+********************
+
+In this challenge we have a network capture file. We can see requests mainly made to `http://0bin.asis.io`, which is the CTF encrypted pastebin. The pastes are AES256 encrypted, so you need the right key to decrypt them.
+
+```text
+148 58.388401   192.168.110.3   87.107.123.4    HTTP    609 GET /paste/Vyk5W274 HTTP/1.1 
+```
+
+The main problem is that the key is not given in the GET parameters, otherwise this would be an easy challenge. I inspected the file and notice requests made to `http://stats.asis.io/piwik.php`, used to analyze users' actions.
+
+```text
+191 59.141180   192.168.110.3   87.107.123.4    HTTP    848 GET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=217602&h=11&m=27&s=47&url=http%3A%2F%2F0bin.asis.io%2Fpaste%2FVyk5W274%231L8OT3oT7Xr0ryJlS5ASprAqgsQysKeebbSK90gGyQo&urlref=http%3A%2F%2F0bin.asis.io%2Fpaste%2FTINcoc0f&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=450 HTTP/1.1
+```
+
+Here is one of the requests made to the analyzing tool. The great thing is that we can see the key, which is the anchor in the `url` parameter. Ths explains why we couldn't retreive the key from the main GET request, the encryption is client-based, and stats are also made through javascript.
+
+```bash
+vic511@vic511:~/ctfs/asis2k15$ cat biglie.pcap | strings | grep GET | grep %2Fpaste%2F
+}<G7GET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=776276&h=11&m=27&s=12&url=http%3A%2F%2F0bin.asis.io%2Fpaste%2FTINcoc0f%23-krvZ7lGwZ4e2JQ8n%2B3dfsMBqyN6Xk6SUzY7i0JKbpo&urlref=http%3A%2F%2F0bin.asis.io%2F&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=108 HTTP/1.1
+GET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=217602&h=11&m=27&s=47&url=http%3A%2F%2F0bin.asis.io%2Fpaste%2FVyk5W274%231L8OT3oT7Xr0ryJlS5ASprAqgsQysKeebbSK90gGyQo&urlref=http%3A%2F%2F0bin.asis.io%2Fpaste%2FTINcoc0f&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=450 HTTP/1.1
+}<|fGET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=048705&h=11&m=27&s=54&url=http%3A%2F%2F0bin.asis.io%2F%3F&urlref=http%3A%2F%2F0bin.asis.io%2Fpaste%2FVyk5W274&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=129 HTTP/1.1
+Valid 0bin ! => GET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=175474&h=11&m=29&s=4&url=http%3A%2F%2F0bin.asis.io%2Fpaste%2F1ThAoKv4%23Zz-nHPnr0vGGg3s%2F7%2FRWD2pnZPZl580x9Y2G3IUehfc&urlref=http%3A%2F%2F0bin.asis.io%2F%3F&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=141 HTTP/1.1
+cGET /piwik.php?action_name=0bin%20-%20encrypted%20pastebin&idsite=1&rec=1&r=999437&h=11&m=29&s=16&url=http%3A%2F%2F0bin.asis.io%2F&urlref=http%3A%2F%2F0bin.asis.io%2Fpaste%2F1ThAoKv4&_id=dd17974841486b63&_idts=1443081356&_idvc=1&_idn=0&_refts=0&_viewts=1443081356&send_image=0&pdf=1&qt=0&realp=0&wma=0&dir=0&fla=1&java=1&gears=0&ag=0&cookie=1&res=1440x900&gt_ms=123 HTTP/1.1
+```
+
+We test every 0bin we have, and finally get the right one : `http://0bin.asis.io/paste/1ThAoKv4#Zz-nHPnr0vGGg3s/7/RWD2pnZPZl580x9Y2G3IUehfc`
+Below is the beautiful ASCII art flag.
+
+![](biglieflag.png)
+
+> The flag is ASIS{e29a3ef6f1d71d04c5f107eb3c64bbbb}
+
+********************
+## [Calm down](#) *75*
+by vic511
+********************
+
+In the given XZ archive is a file called `flagBag.txt`.
+
+```bash
+vic511@vic511:~/ctfs/asis2k15$ wc -l flagBag.txt 
+287561 flagBag.txt
+```
+
+The file is containing many and many flags, under the format `ASIS{md5}`, and we have to "guess" which is the right one. Let's try to grep the file and check if any line is not starting with `A`.
+
+```bash
+vic511@vic511:~/ctfs/asis2k15$ grep -E "^[^A].*" flagBag.txt
+Binary file flagBag.txt matches
+```
+
+Wait, this is supposed to be an ASCII file ! Let's check what's wrong with `hd`
+
+```bash
+vic511@vic511:~/ctfs/asis2k15$ hd flagBag.txt | head
+00000000  2d 2d 2d 2d 2d 2d 2d 2d  2d 2d 57 68 69 63 68 20  |----------Which |
+00000010  6f 6e 65 20 69 73 20 66  6c 61 67 3f 2d 2d 2d 2d  |one is flag?----|
+00000020  2d 2d 2d 2d 2d 2d 0a 41  53 49 53 7b 33 65 63 35  |------.ASIS{3ec5|
+00000030  36 33 38 30 39 32 30 66  36 62 34 61 38 61 62 37  |6380920f6b4a8ab7|
+00000040  63 38 35 66 61 00 66 36  66 32 36 36 37 7d 0a 41  |c85fa.f6f2667}.A|
+00000050  53 49 53 7b 62 33 35 33  32 61 65 62 61 66 32 64  |SIS{b3532aebaf2d|
+00000060  65 37 65 61 30 66 65 63  64 63 66 00 38 30 64 39  |e7ea0fecdcf.80d9|
+00000070  31 62 32 39 62 7d 0a 41  53 49 53 7b 35 31 34 38  |1b29b}.ASIS{5148|
+00000080  64 39 63 62 33 64 39 37  64 37 64 31 65 39 64 37  |d9cb3d97d7d1e9d7|
+00000090  34 64 63 35 00 30 39 34  32 33 39 33 63 7d 0a 41  |4dc5.0942393c}.A|
+```
+
+Well, it seems like every line has a null byte inside it, the file is then considered as binary. I guess that we have to get the hash not containing a null byte : let's use a python script.
+
+```python
+#!/usr/bin/python3
+import sys
+
+with open("flagBag.txt", "rb") as f:
+    while 1:
+        c = f.readline()[5:37];
+        if c==b"":
+            sys.exit()
+        if not 0x00 in c:
+            print(str(c))
+```
+
+Let's try it.
+
+```bash
+vic511@vic511:~/ctfs/asis2k15$ ./flagBag.py 
+b'-----Which one is flag?---------'
+b'dc99999733dd1f4ebf8c199753c05595'
+```
+
+We have the correct hash !
+> The flag is ASIS{dc99999733dd1f4ebf8c199753c05595}
+    </xmp>
+    <script src="https://smzg.github.io/strapdown/example/config/strapdown.js"></script>
+</html>
+
